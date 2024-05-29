@@ -1,0 +1,54 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName": {
+            "type": "string"
+        },
+        "webAppPlanName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('webAppPlanName')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('webAppName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('webAppPlanName'))]"
+            ],
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('webAppPlanName'))]",
+                "siteConfig": {
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "minTlsVersion": "1.2",
+                    "scmType": "LocalGit",
+                    "use32BitWorkerProcess": true,
+                    "webSocketsEnabled": false,
+                    "appSettings": [
+                        {
+                            "name": "WEBSITE_AUTH_ENABLED",
+                            "value": "True"
+                        },
+                        {
+                            "name": "WEBSITE_AUTH_UNAUTHENTICATED_ACTION",
+                            "value": "RedirectToLoginPage"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
